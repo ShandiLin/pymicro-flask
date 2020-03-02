@@ -1,0 +1,15 @@
+title = "Default Service Config"
+
+[server]
+# use $PYMICRO if exists, else config here
+pymicro = "http://0.0.0.0:8080"
+
+[statsd]
+# use $PYMICRO_SEND_METRICS if exists, else config here
+send_metrics = false
+# use $PYMICRO_STATSD if exists, else config here, set if 'send_metrics' is true
+pymicro_statsd = "http://0.0.0.0:9125"
+
+[output]
+# value in output section can contain environment variables, such as $PYMICRO_DATADIR/output
+data_dir = "$PYMICRO_DATADIR/data"

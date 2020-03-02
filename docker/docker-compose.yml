@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  pymicro-flask:
+    container_name: pymicro-flask
+    image: pymicro-flask:0.0.1
+    build:
+      context: ../
+      dockerfile: docker/uwsgi/Dockerfile
+      args:
+        - PYMICRO_DATADIR=/tmp
+        - PYMICRO_PORT=8080
+    environment:
+      - PYMICRO_DATADIR=/tmp
+      - PYMICRO=http://0.0.0.0:8080
+      - PYMICRO_CONCURRENCY=4
+      - PYMICRO_TIMEOUT=60
+      - PYMICRO_SEND_METRICS=true
+      - PYMICRO_STATSD=http://pymicro-metrics:9125
+      - PYMICRO_LOGLEVEL=WARN
+    ports:
+      - 8080:8080
+
+  pymicro-metrics:
+    container_name: pymicro-metrics
+    image: prom/statsd-exporter
+    expose:
+      - 9125
+    ports:
+      - 9102:9102

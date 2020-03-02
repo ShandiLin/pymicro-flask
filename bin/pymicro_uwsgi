@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# [Mandatory Environment Variebles]
+PYMICRO_HOME=$(dirname $(dirname $(which pymicro_server)))
+if [ -z $PYMICRO_HOME ]
+then
+    echo "pymicro_server executable not found in environment"
+    exit 1
+fi
+
+if [ -z $PYMICRO_DATADIR ]
+then
+    echo "PYMICRO_DATADIR not set, using default: /tmp"
+    export PYMICRO_DATADIR=/tmp
+fi
+
+# [Optional Environment Variebles]
+if [ -z $PYMICRO_CONCURRENCY ]
+then
+    echo "PYMICRO_CONCURRENCY not set, using default value: 2"
+    export PYMICRO_CONCURRENCY=2
+fi
+
+if [ -z $PYMICRO_TIMEOUT ]
+then
+    echo "PYMICRO_TIMEOUT not set, using default value: 60"
+    export PYMICRO_TIMEOUT=60
+fi
+
+# export server config, use for filling value in conf/uwsgi.ini
+IFS=$'\r\n' read -d '' -r -a server_conf <<< "$(python -c 'from pymicro_flask.config import get_server_config; get_server_config()')"
+export PYMICRO=$(echo ${server_conf[0]} | awk -F'=' '{print $2}')
+export PYMICRO_HOST=$(echo ${server_conf[1]} | awk -F'=' '{print $2}')
+export PYMICRO_PORT=$(echo ${server_conf[2]} | awk -F'=' '{print $2}')
+export PYMICRO_SEND_METRICS=$(echo ${server_conf[3]} | awk -F'=' '{print $2}')
+export PYMICRO_STATSD=$(echo ${server_conf[4]} | awk -F'=' '{print $2}')
+export PYMICRO_STATSD_HOST=$(echo ${server_conf[5]} | awk -F'=' '{print $2}')
+export PYMICRO_STATSD_PORT=$(echo ${server_conf[6]} | awk -F'=' '{print $2}')
+
+str2bool () {
+    case "$1" in
+        true|True) echo true ;;
+        false|False) echo false ;;
+        *) echo "[ERROR]: Unknown boolean value \"$1\"";;
+    esac
+}
+
+run_uwsgi () {
+    export PYMICRO_CALLABLE=$1
+    UWSGI="$(which uwsgi)"
+
+    # enable gevent if $PYMICRO_GEVENT is set
+    if [ -n "$PYMICRO_GEVENT" ] ; then
+        echo "enable gevent with PYMICRO_GEVENT=$PYMICRO_GEVENT"
+        UWSGI="$UWSGI --gevent $PYMICRO_GEVENT --gevent-early-monkey-patch"
+    fi
+    INI_ARGS="--ini $PYMICRO_HOME/conf/uwsgi.ini"
+
+    # add statsd section if callable is app (which means $PYMICRO_SEND_METRICS is True)
+    if [ "$PYMICRO_CALLABLE" = "app" ]
+    then
+        INI_ARGS="$INI_ARGS --ini $PYMICRO_HOME/conf/uwsgi.ini:statsd"
+    fi
+    # run uwsgi with one or multiple sections in ini file
+    echo "run $UWSGI $INI_ARGS"
+    $UWSGI $INI_ARGS
+}
+
+echo "starts app in PYMICRO=$PYMICRO, HOST=$PYMICRO_HOST, PORT=$PYMICRO_PORT"
+send_metrics=$(str2bool $PYMICRO_SEND_METRICS)
+if [ "$send_metrics" = false ]
+then
+    echo "metrics in $PYMICRO/metrics"
+    run_uwsgi "app_dispatch"
+elif [ "$send_metrics" = true ]
+then
+    echo "metrics sent to $PYMICRO_STATSD"
+    run_uwsgi "app"
+else
+    echo "$send_metrics"
+    exit 1
+fi

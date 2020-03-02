@@ -1,0 +1,32 @@
+# Logs
+logs
+*.log
+
+# vs code
+.vscode
+
+# OS generated files
+.DS_Store*
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Distribution / packaging
+.Python
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+
+# Compiled source
+*.pyc
+
+# Test and Cache
+.pytest_cache
+.cache
+.coverage

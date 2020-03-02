@@ -1,0 +1,8 @@
+datadog==0.34.1
+Flask==1.1.1
+Flask-RESTful==0.3.8
+gevent==1.4.0
+prometheus-client==0.7.1
+six==1.14.0
+toml==0.10.0
+uwsgi==2.0.18
