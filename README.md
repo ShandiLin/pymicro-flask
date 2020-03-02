@@ -2,19 +2,24 @@
 
 > Python micro web service using uwsgi and flask, with prometheus metrics<br/>
 
-Pymicro-flask accepts POST requests with json format data and return with json format result.<br/>
+Pymicro-flask accepts POST requests with json format data and return with json format result. The prometheus metrics are updated after handling requests and is accessible in `/metrics` <br/>
+
+![](docs/img/pymicro_arch.png)
 
 # APIs
-* Service: `http://HOST:8080/microservice`
+* Service: `http://HOST:PORT/microservice`
 * Prometheus:
-    * when PYMICRO_SEND_METRICS=true, `http://HOST:9102/metrics`
-    * when PYMICRO_SEND_METRICS=false, `http://HOST:8080/metrics`
+    * If `$PYMICRO_SEND_METRICS`=`true`, metrics serve in `http://STATSD_HOST:STATSD_PORT/metrics`
+        * default: `http://0.0.0.0:9102/metrics`
+    * If `$PYMICRO_SEND_METRICS`=`false`, metrics serve in `http://HOST:PORT/metrics`
+        * default: `http://0.0.0.0:8080/metrics`
+> check [Prometheus Metrics](#Prometheus-Metrics)
 
 ## API Query Example
-process logic in [`pymicro_flask/msg_handler.py`](pymicro_flask/msg_handler.py)
+Messages handling logic in [`pymicro_flask/msg_handler.py`](pymicro_flask/msg_handler.py)
 
 ```bash
-$ curl -X POST -d '{"hello":"pymicro-flask"}' http://HOST:8080/microservice
+$ curl -X POST -d '{"hello":"pymicro-flask"}' http://HOST:PORT/microservice
 {
     "pymicro.s_time":"1582092922.6149724",
     "pymicro.e_time":"1582092924.6151698",
@@ -32,14 +37,17 @@ $ docker-compose -f docker/docker-compose.yml up -d
 ## ENV Config
 * check env setting in [`docker/docker-compose.yml`](docker/docker-compose.yml)
 ```ini
-# Dirpath to temporarily store pdf files
+# Dirpath to temporarily store pdf files (default: /tmp)
 PYMICRO_DATADIR=/tmp
 
 # Server config (default: "http://0.0.0.0:8080")
 PYMICRO=http://0.0.0.0:8080
 
-# How many reuquests can be handled concurrently (defulat: 4)
+# How many reuquests can be handled concurrently (default: 4)
 PYMICRO_CONCURRENCY=4
+
+# [Optional] Enable gevent loop engine in uwsgi if given (default disabled)
+PYMICRO_GEVENT=2
 
 # Timeout for pymicro service (default: 60s)
 PYMICRO_TIMEOUT=60
@@ -59,13 +67,18 @@ PYMICRO_LOGCONFIG=<path to your log config file>
 ```
 
 # Prometheus Metrics
-Metric update logic: [`pymicro_flask/server/metrics.py`](pymicro_flask/server/metrics.py).<br/>
+* If `$PYMICRO_SEND_METRICS` is `true`, all the uwsgi workers will send the metrics defined by application to statsd server using [`datadogpy`](https://github.com/DataDog/datadogpy). Prometheus can pull metrics from `http://STATSD_HOST:STATSD_PORT/metrics`.
+    * Check [`docker/docker-compose.yml`](docker/docker-compose.yml) for the deployment setting.
+    * Also [`uwsgi-dogstatsd`](https://github.com/Datadog/uwsgi-dogstatsd) plugin is used for sending information of every uwsgi worker.
+* If `$PYMICRO_SEND_METRICS` is `false`, [`prometheus/client_python`](https://github.com/prometheus/client_python) is used to dispatch metrics to `/metrics` path. Prometheus can pull metrics from `http://HOST:PORT/metrics`.
+    * Web Service and Metrics Service serve in same port, which should be only used for testing.
+    * Metrics defined by application only.
 
-----------
+Metric update logic: [`pymicro_flask/server/metrics.py`](pymicro_flask/server/metrics.py).<br/>
 
 ## metrics
 * `pymicro_req_total` (counter) The total counts of requests
-* `pymicro_ret_req_total{pymicro_ret}` (counter) The total counts of different ret code requests
+* `pymicro_ret_req_total{pymicro_ret="0"}` (counter) The total counts of different ret code requests
 
 # Pymicro Service
 ## How to run in local
@@ -73,7 +86,6 @@ Metric update logic: [`pymicro_flask/server/metrics.py`](pymicro_flask/server/me
 * if using `virtualenv` for python, make sure commands below is running within venv.
 ```shell
 $ cd pymicro-flask
-$ export PYMICRO_DATADIR=<path to temporarily hold pdf files>
 $ ./run_build.sh
 $ pymicro_uwsgi
 ```
