@@ -61,7 +61,6 @@ class TestGlobalConfigParser:
     def test_invalid_type(self):
         for f in ["invalid_output_env_dirpath.toml",
                   "invalid_output.toml",
-                  "invalid_output_dirpath.toml",
                   "invalid_server.toml",
                   "invalid_send_metric.toml",
                   "invalid_conf.toml"]:
@@ -117,7 +116,6 @@ class TestGlobalConfigParser:
         assert get_send_metrics() == False
 
     def test_is_permission_denied(self, mocker):
-        assert is_permission_denied("///abc") is True
         assert is_permission_denied(DATA_DIR) is False
         assert is_permission_denied(
             os.path.join(os.environ["PYMICRO_DATADIR"],
