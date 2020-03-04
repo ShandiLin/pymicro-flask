@@ -1,6 +1,10 @@
 import os
 import sys
 
+# add this line to avoid No module named 'pymicro_flask', make pytest happy :)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# import helpers
 sys.path.append(os.path.join(os.path.dirname(__file__), 'helpers'))
 
 unset_list = list()
