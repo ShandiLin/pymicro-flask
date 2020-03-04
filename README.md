@@ -1,8 +1,9 @@
 # Pymicro-flask
 
-> Python micro web service using uwsgi and flask, with prometheus metrics<br/>
+[![Build Status](https://travis-ci.com/ShandiLin/pymicro-flask.svg?branch=master)](https://travis-ci.com/ShandiLin/pymicro-flask)
 
-Pymicro-flask accepts POST requests with json format data and return with json format result. The prometheus metrics are updated after handling requests and is accessible in `/metrics` <br/>
+Pymicro-flask is a Python micro web service using uwsgi and flask, with prometheus metrics<br/><br/>
+It accepts POST requests with json format data and return with json format result. The prometheus metrics are updated after handling requests and is accessible in `/metrics` <br/>
 
 ![](docs/img/pymicro_arch.png)
 
