@@ -1,0 +1,23 @@
+language: python
+python: 2.7
+env:
+  global:
+    - IMAGE=pymicro-flask
+    - PYMICRO=http://0.0.0.0:8080
+    - PYMICRO_SEND_METRICS=true
+    - PYMICRO_STATSD_WEB=http://0.0.0.0:9102
+services:
+  - docker
+before_install:
+  - docker version
+  - docker-compose version
+before_script:
+  - docker-compose -f docker/docker-compose.yml build $IMAGE
+  - docker run --rm $IMAGE /bin/bash /pymicro-flask/run_test.sh
+script:
+  - docker-compose -f docker/docker-compose.yml up -d
+  - docker run --rm python:alpine /pymicro-flask/docker/test.sh
+  - docker-compose -f docker/docker-compose.yml down
+branches:
+  only:
+    - master
