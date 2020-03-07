@@ -17,15 +17,34 @@ fi
 # [Optional Environment Variebles]
 if [ -z $PYMICRO_CONCURRENCY ]
 then
-    echo "PYMICRO_CONCURRENCY not set, using default value: 2"
-    export PYMICRO_CONCURRENCY=2
+    echo "PYMICRO_CONCURRENCY not set, using default value: 4 (workers)"
+    export PYMICRO_CONCURRENCY=4
 fi
 
 if [ -z $PYMICRO_TIMEOUT ]
 then
-    echo "PYMICRO_TIMEOUT not set, using default value: 60"
+    echo "PYMICRO_TIMEOUT not set, using default value: 60 (s)"
     export PYMICRO_TIMEOUT=60
 fi
+
+if [ -z $PYMICRO_WORKER_MAX_REQ ]
+then
+    echo "PYMICRO_WORKER_MAX_REQ not set, using default value: 10000 (requests)"
+    export PYMICRO_WORKER_MAX_REQ=10000
+fi
+
+if [ -z $PYMICRO_WORKER_MAX_LIFE ]
+then
+    echo "PYMICRO_WORKER_MAX_LIFE not set, using default value: 3600 (s)"
+    export PYMICRO_WORKER_MAX_LIFE=3600
+fi
+
+if [ -z $PYMICRO_WORKER_MAX_RSS ]
+then
+    echo "PYMICRO_WORKER_MAX_RSS not set, using default value: 512 (MB)"
+    export PYMICRO_WORKER_MAX_RSS=512
+fi
+
 
 # export server config, use for filling value in conf/uwsgi.ini
 IFS=$'\r\n' read -d '' -r -a server_conf <<< "$(python -c 'from pymicro_flask.config import get_server_config; get_server_config()')"

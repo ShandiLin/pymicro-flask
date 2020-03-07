@@ -65,6 +65,15 @@ PYMICRO_LOGLEVEL=WARN
 
 # Log config file for pymicro (default: "conf/logging_config.ini")
 PYMICRO_LOGCONFIG=<path to your log config file>
+
+# Restart workers after n requests (default: 10000 requests)
+PYMICRO_WORKER_MAX_REQ=10000
+
+# Restart workers after n seconds (default: 3600 secs)
+PYMICRO_WORKER_MAX_LIFE=3600
+
+# Restart workers if the usage of resident set size of memory exceed n MB (default: 512 MB)
+PYMICRO_WORKER_MAX_RSS=512
 ```
 
 # Prometheus Metrics
@@ -72,7 +81,7 @@ PYMICRO_LOGCONFIG=<path to your log config file>
     * Check [`docker/docker-compose.yml`](docker/docker-compose.yml) for the deployment setting.
     * Also [`uwsgi-dogstatsd`](https://github.com/Datadog/uwsgi-dogstatsd) plugin is used for sending information of every uwsgi worker.
 * If `$PYMICRO_SEND_METRICS` is `false`, [`prometheus/client_python`](https://github.com/prometheus/client_python) is used to dispatch metrics to `/metrics` path. Prometheus can pull metrics from `http://HOST:PORT/metrics`.
-    * Web Service and Metrics Service serve in same port, which should be only used for testing.
+    * Web Service and Metrics Service serve in same port, which should be only used for testing (if there's more than one uwsgi worker, the GET requests to `http://HOST:PORT/metrics` will response with metrics count by one of the uwsgi worker, which is not the total count number).
     * Metrics defined by application only.
 
 Metric update logic: [`pymicro_flask/server/metrics.py`](pymicro_flask/server/metrics.py).<br/>

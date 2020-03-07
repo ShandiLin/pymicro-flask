@@ -18,6 +18,9 @@ services:
       - PYMICRO_SEND_METRICS=true
       - PYMICRO_STATSD=http://pymicro-metrics:9125
       - PYMICRO_LOGLEVEL=WARN
+      - PYMICRO_WORKER_MAX_REQ=10000
+      - PYMICRO_WORKER_MAX_LIFE=3600
+      - PYMICRO_WORKER_MAX_RSS=512
     expose:
       - 8080
     # ports:
