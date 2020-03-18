@@ -1,6 +1,4 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-
+# -*- coding: utf-8 -*-
 import json
 import time
 

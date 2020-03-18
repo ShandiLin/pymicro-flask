@@ -5,6 +5,7 @@ import os
 import logging
 import random
 
+from pymicro_flask.config.config import pymicro_conf
 from pymicro_flask.ret_code import *
 
 from tutils import test_client
@@ -22,14 +23,14 @@ def test_pymicro_post_400(test_client, mocker):
         '[{"abc":"def"}]',          # only one json object is available
     ]
     for send_metrics, metrics_mock in [
-        ("False", mocker.patch('pymicro_flask.server.metrics.inc_metrics', return_value=None)),
-        ("True", mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd', return_value=None))
+        (False, mocker.patch('pymicro_flask.server.metrics.inc_metrics')),
+        (True, mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd'))
     ]:
-        os.environ["PYMICRO_SEND_METRICS"] = send_metrics
-        for data in invalid_data_list:
+        mocker.patch.object(pymicro_conf, "get_send_metrics", return_value=send_metrics)
+        for i, data in enumerate(invalid_data_list, 1):
             response = test_client.post(PYMICRO_API_PATH, data=data)
             assert response.status_code == 400
-            assert metrics_mock.call_count == 0
+            assert metrics_mock.call_count == i
 
 
 def test_pymicro_post_200(test_client, mocker):
@@ -38,10 +39,10 @@ def test_pymicro_post_200(test_client, mocker):
     '''
     data = '{"abc":"def"}'
     for send_metrics, metrics_mock in [
-        ("False", mocker.patch('pymicro_flask.server.metrics.inc_metrics', return_value=None)),
-        ("True", mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd', return_value=None))
+        (False, mocker.patch('pymicro_flask.server.metrics.inc_metrics')),
+        (True, mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd'))
     ]:
-        os.environ["PYMICRO_SEND_METRICS"] = send_metrics
+        mocker.patch.object(pymicro_conf, "get_send_metrics", return_value=send_metrics)
         mocker.patch('random.randint', return_value=2)
         response = test_client.post(PYMICRO_API_PATH, data=data)
         assert response.status_code == 200
@@ -64,10 +65,10 @@ def test_pymicro_post_exception(test_client, mocker):
     '''
     data = '{"abc":"def"}'
     for send_metrics, metrics_mock in [
-        ("False", mocker.patch('pymicro_flask.server.metrics.inc_metrics', return_value=None)),
-        ("True", mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd', return_value=None))
+        (False, mocker.patch('pymicro_flask.server.metrics.inc_metrics')),
+        (True, mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd'))
     ]:
-        os.environ["PYMICRO_SEND_METRICS"] = send_metrics
+        mocker.patch.object(pymicro_conf, "get_send_metrics", return_value=send_metrics)
         mocker.patch('pymicro_flask.msg_handler.process_message', side_effect=Exception('mocked error'))
         response = test_client.post(PYMICRO_API_PATH, data=data)
         assert response.status_code == 500
@@ -80,10 +81,10 @@ def test_pymicro_send_metrics_exception(test_client, mocker):
     '''
     data = '{"abc":"def"}'
     for send_metrics, metrics_mock in [
-        ("False", mocker.patch('pymicro_flask.server.metrics.inc_metrics', side_effect=Exception('mocked error'))),
-        ("True", mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd', side_effect=Exception('mocked error')))
+        (False, mocker.patch('pymicro_flask.server.metrics.inc_metrics', side_effect=Exception('mocked error'))),
+        (True, mocker.patch('pymicro_flask.server.metrics.inc_metrics_statsd', side_effect=Exception('mocked error')))
     ]:
-        os.environ["PYMICRO_SEND_METRICS"] = send_metrics
+        mocker.patch.object(pymicro_conf, "get_send_metrics", return_value=send_metrics)
         logger_mock = mocker.patch.object(logging.getLogger('pymicro_flask.server.resouces'), 'error')
         response = test_client.post(PYMICRO_API_PATH, data=data)
         assert response.status_code == 200

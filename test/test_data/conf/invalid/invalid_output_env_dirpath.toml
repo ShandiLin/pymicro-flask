@@ -1,7 +1,7 @@
 title = "Default Service Config"
 
 [server]
-pymicro = "http://0.0.0.0:8080"
+pymicro_server = "http://0.0.0.0:8080"
 
 [statsd]
 send_metrics = true

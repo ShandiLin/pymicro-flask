@@ -47,8 +47,8 @@ fi
 
 
 # export server config, use for filling value in conf/uwsgi.ini
-IFS=$'\r\n' read -d '' -r -a server_conf <<< "$(python -c 'from pymicro_flask.config import get_server_config; get_server_config()')"
-export PYMICRO=$(echo ${server_conf[0]} | awk -F'=' '{print $2}')
+IFS=$'\r\n' read -d '' -r -a server_conf <<< "$(python -c 'from pymicro_flask.config.config import pymicro_conf; pymicro_conf.print_server_config()')"
+export PYMICRO_SERVER=$(echo ${server_conf[0]} | awk -F'=' '{print $2}')
 export PYMICRO_HOST=$(echo ${server_conf[1]} | awk -F'=' '{print $2}')
 export PYMICRO_PORT=$(echo ${server_conf[2]} | awk -F'=' '{print $2}')
 export PYMICRO_SEND_METRICS=$(echo ${server_conf[3]} | awk -F'=' '{print $2}')
@@ -85,11 +85,11 @@ run_uwsgi () {
     $UWSGI $INI_ARGS
 }
 
-echo "starts app in PYMICRO=$PYMICRO, HOST=$PYMICRO_HOST, PORT=$PYMICRO_PORT"
+echo "starts app in PYMICRO=$PYMICRO_SERVER, HOST=$PYMICRO_HOST, PORT=$PYMICRO_PORT"
 send_metrics=$(str2bool $PYMICRO_SEND_METRICS)
 if [ "$send_metrics" = false ]
 then
-    echo "metrics in $PYMICRO/metrics"
+    echo "metrics in $PYMICRO_SERVER/metrics"
     run_uwsgi "app_dispatch"
 elif [ "$send_metrics" = true ]
 then

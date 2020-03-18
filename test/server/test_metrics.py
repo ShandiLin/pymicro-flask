@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-
 
 from pymicro_flask.server.metrics import *
 from pymicro_flask.server.app import create_app
@@ -9,40 +7,17 @@ from pymicro_flask.ret_code import *
 from tutils import CompareMetrics, FakeSocket
 
 
-MKEY_RET = KEY_RET.replace('.', '_')
-
-def success_return():
-    return {
-        KEY_E_TIME: "1581347950.82",
-        KEY_RET: RET_SUCCESS,
-        KEY_S_TIME: "1581347950.82",
-    }
-
-def fail_return():
-    return {
-        KEY_E_TIME: "1581347950.82",
-        KEY_RET: RET_FAILED,
-        KEY_S_TIME: "1581347950.82",
-    }
-
-
 @CompareMetrics({
     PYMC_REQ: 1,
-    PYMC_RET_REQ: 1,
-}, RET_SUCCESS)
+}, 200)
 def test_inc_metrics_req_total_success():
-    # only add request total
-    result = success_return()
-    inc_metrics(result)
+    inc_metrics(code=200)
 
 @CompareMetrics({
     PYMC_REQ: 1,
-    PYMC_RET_REQ: 1,
-}, RET_FAILED)
+}, 500)
 def test_inc_metrics_req_total_fail():
-    # only add request total
-    result = fail_return()
-    inc_metrics(result)
+    inc_metrics(code=500)
 
 
 from werkzeug.test import create_environ
@@ -59,20 +34,15 @@ def test_setup_metrics():
 def test_inc_metrics_statsd_success():
     statsd = DogStatsd()
     statsd.socket = FakeSocket()
-    result = success_return()
-    inc_metrics_statsd(result, statsd=statsd)
+    inc_metrics_statsd(code=200, statsd=statsd)
 
-    assert statsd.socket.recv() == '{s}:1|c'.format(s=PYMC_REQ)
-    assert statsd.socket.recv() == '{s}:1|c|#{k}:{v}'.format(
-        k=MKEY_RET, s=PYMC_RET_REQ, v=RET_SUCCESS)
-
+    assert statsd.socket.recv() == '{s}:1|c|#code:{v}'.format(
+        s=PYMC_REQ, v=200)
 
 def test_inc_metrics_statsd_fail():
     statsd = DogStatsd()
     statsd.socket = FakeSocket()
-    result = fail_return()
-    inc_metrics_statsd(result, statsd=statsd)
+    inc_metrics_statsd(code=500, statsd=statsd)
 
-    assert statsd.socket.recv() == '{s}:1|c'.format(s=PYMC_REQ)
-    assert statsd.socket.recv() == '{s}:1|c|#{k}:{v}'.format(
-        k=MKEY_RET, s=PYMC_RET_REQ, v=RET_FAILED)
+    assert statsd.socket.recv() == '{s}:1|c|#code:{v}'.format(
+        s=PYMC_REQ, v=500)

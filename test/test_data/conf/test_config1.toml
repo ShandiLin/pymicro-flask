@@ -1,8 +1,8 @@
-title = "Default Service Config"
+title = "Test Service Config - 1"
 
 [server]
 # use $PYMICRO if exists, else config here
-pymicro = "http://0.0.0.0:8080"
+pymicro_server = "http://0.0.0.0:8080"
 
 [statsd]
 # use $PYMICRO_SEND_METRICS if exists, else config here

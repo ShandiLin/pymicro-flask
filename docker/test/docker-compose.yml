@@ -1,6 +1,6 @@
 version: '3'
 
-# >> cd odin_jasper
+# >> cd pymicro_flask
 # >> docker-compose -f docker/docker-compose.yml -f docker/test/docker-compose.yml run test
 services:
   test:
@@ -9,7 +9,7 @@ services:
       dockerfile: ./test/Dockerfile
     image: pymicro-flask-test
     environment:
-        - PYMICRO=http://pymicro-flask:8080
+        - PYMICRO_SERVER=http://pymicro-flask:8080
         - PYMICRO_SEND_METRICS=true
         - PYMICRO_STATSD_WEB=http://pymicro-metrics:9102
     depends_on:

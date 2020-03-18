@@ -42,7 +42,7 @@ $ docker-compose -f docker/docker-compose.yml up -d
 PYMICRO_DATADIR=/tmp
 
 # Server config (default: "http://0.0.0.0:8080")
-PYMICRO=http://0.0.0.0:8080
+PYMICRO_SERVER=http://0.0.0.0:8080
 
 # How many reuquests can be handled concurrently (default: 4)
 PYMICRO_CONCURRENCY=4
@@ -59,6 +59,9 @@ PYMICRO_SEND_METRICS=true
 # Statsd server config (default: http://0.0.0.0:9125)
 # Used when PYMICRO_SEND_METRICS=true
 PYMICRO_STATSD=http://pymicro-metrics:9125
+
+# Service config file for pymicro (default: "conf/service.toml")
+PYMICRO_CONFIG=<path to your config file>
 
 # Log level for pymicro (default: INFO)
 PYMICRO_LOGLEVEL=WARN
@@ -87,8 +90,7 @@ PYMICRO_WORKER_MAX_RSS=512
 Metric update logic: [`pymicro_flask/server/metrics.py`](pymicro_flask/server/metrics.py).<br/>
 
 ## metrics
-* `pymicro_req_total` (counter) The total counts of requests
-* `pymicro_ret_req_total{pymicro_ret="0"}` (counter) The total counts of different ret code requests
+* `pymicro_req_total{code=...}` (counter) The total counts of requests, code is the http status code
 
 # Pymicro Service
 ## How to run in local

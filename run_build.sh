@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-# create data directory if needed
-if [ -z "$PYMICRO_DATADIR" ]
-then
-    echo "PYMICRO_DATADIR not set, using default: /tmp"
-    export PYMICRO_DATADIR=/tmp
-fi
-mkdir -p $PYMICRO_DATADIR
-
 BASEDIR="$(cd "`dirname "$0"`"; pwd)"
 
 # build and install python libraries

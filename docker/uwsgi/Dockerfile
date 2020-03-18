@@ -1,11 +1,6 @@
 From python:3.8-alpine
 
-# install pymicro_flask (need to set PYMICRO_DATADIR and PYMICRO_PORT)
-ARG PYMICRO_DATADIR
-ENV PYMICRO_DATADIR $PYMICRO_DATADIR
-ARG PYMICRO_PORT
-ENV PYMICRO_PORT $PYMICRO_PORT
-
+# install pymicro_flask
 ENV PYMICRO_UWSGI_PLUGIN_DIR "/usr/local/lib/uwsgi_plugins"
 
 ADD . /pymicro_flask/
@@ -21,8 +16,6 @@ RUN apk add --no-cache --virtual .build-deps gcc musl-dev g++ \
     libc-dev linux-headers openssl-dev pcre-dev libcap-dev zlib-dev git && \
     ./run_build.sh &&  \
     apk del .build-deps
-
-EXPOSE ${PYMICRO_PORT:-8080}
 
 # default command
 CMD ["pymicro_uwsgi"]

@@ -1,4 +1,4 @@
-title = "Default Service Config"
+title = "Test Service Config"
 
 [server]
 # use $PYMICRO if exists, else config here
